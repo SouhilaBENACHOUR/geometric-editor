@@ -1,0 +1,15 @@
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\editor\GenericFormEditor.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\editor\GroupFormEditor.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\editor\RectangleFormEditor.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\Main.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\model\Form.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\model\FormAbstract.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\model\FormComposite.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\model\FormEditor.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\model\FormObserver.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\model\FormVisitor.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\model\Rectangle.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\model\RegularPolygon.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\view\FormAwtImplementation.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\view\FormImplementation.java
+C:\Users\DELL\geometric-editor\src\main\java\fr\ubordeaux\geometriceditor\view\FormTxtImplementation.java

@@ -18,7 +18,6 @@
   </properties>
 
   <dependencies>
-    <!-- JUnit 5 -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -28,32 +27,39 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+
     <plugins>
-      <!-- Compiler Java 17 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.12.1</version>
       </plugin>
 
-      <!-- Pour lancer les tests JUnit 5 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
       </plugin>
 
-      <!-- Pour lancer Main directement avec mvn exec:java -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.1.0</version>
         <configuration>
           <mainClass>fr.ubordeaux.geometriceditor.Main</mainClass>
+          <executable>/usr/lib/jvm/java-21-openjdk-amd64/bin/java</executable>
+          <environmentVariables>
+            <LD_LIBRARY_PATH></LD_LIBRARY_PATH>
+            <LD_PRELOAD></LD_PRELOAD>
+          </environmentVariables>
         </configuration>
       </plugin>
 
-      <!-- JAR exécutable -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>

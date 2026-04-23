@@ -1,0 +1,4 @@
+fr\ubordeaux\geometriceditor\command\CommandManagerTest.class
+fr\ubordeaux\geometriceditor\integration\IntegrationTest.class
+fr\ubordeaux\geometriceditor\model\PrototypeTest.class
+fr\ubordeaux\geometriceditor\serialization\SceneSerializerTest.class

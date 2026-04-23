@@ -19,7 +19,6 @@ import java.awt.event.WindowEvent;
 
 public class EditDialog extends Dialog {
 
-    // Snapshot avant ouverture
     private final int    snapX, snapY, snapColor;
     private final double snapRot;
     private final int    snapW, snapH, snapArc;
@@ -28,20 +27,14 @@ public class EditDialog extends Dialog {
     private final Form form;
     private Runnable   onApply;
 
-    // Champs communs
     private final TextField tfX, tfY, tfColor, tfRot, tfTx, tfTy;
-
-    // Champs Rectangle
     private final TextField tfW, tfH, tfArc;
-
-    // Champs Polygon
     private final TextField tfSides, tfLen;
 
     public EditDialog(Frame parent, Form form) {
         super(parent, "Éditer la forme", true);
         this.form = form;
 
-        // Snapshot
         snapX     = form.x();
         snapY     = form.y();
         snapColor = form.getColor();
@@ -59,16 +52,14 @@ public class EditDialog extends Dialog {
             snapW = snapH = snapArc = snapSides = snapLen = 0;
         }
 
-        // Calcul du nombre de lignes
-        int rows = 7; // X, Y, Rotation, Translation X, Translation Y, Couleur, boutons
+        int rows = 7;
         if (form instanceof Rectangle)      rows += 3;
         if (form instanceof RegularPolygon) rows += 2;
 
         setLayout(new GridLayout(rows, 2, 8, 6));
-        setSize(360, rows * 38 + 20);
+        setSize(400, rows * 42 + 60);
         setLocationRelativeTo(parent);
 
-        // Champs communs
         tfX     = addField("Position X :",     String.valueOf(form.x()));
         tfY     = addField("Position Y :",     String.valueOf(form.y()));
         tfRot   = addField("Rotation (°) :",   String.valueOf((int) snapRot));
@@ -77,7 +68,6 @@ public class EditDialog extends Dialog {
         tfColor = addField("Couleur (hex) :",
             String.format("%06X", form.getColor() & 0xFFFFFF));
 
-        // Champs Rectangle
         if (form instanceof Rectangle) {
             Rectangle r = (Rectangle) form;
             tfW   = addField("Largeur :",  String.valueOf(r.getWidth()));
@@ -87,7 +77,6 @@ public class EditDialog extends Dialog {
             tfW = tfH = tfArc = null;
         }
 
-        // Champs Polygon
         if (form instanceof RegularPolygon) {
             RegularPolygon p = (RegularPolygon) form;
             tfSides = addField("Côtés :",         String.valueOf(p.getSides()));
@@ -96,7 +85,6 @@ public class EditDialog extends Dialog {
             tfSides = tfLen = null;
         }
 
-        // Boutons
         Button btnApply  = new Button("Appliquer");
         Button btnOk     = new Button("OK");
         Button btnCancel = new Button("Annuler");
@@ -118,7 +106,8 @@ public class EditDialog extends Dialog {
             dispose();
         });
 
-        Panel btnPanel = new Panel(new FlowLayout(FlowLayout.CENTER, 8, 4));
+        // GridLayout 1x3 pour que les 3 boutons tiennent sur une ligne
+        Panel btnPanel = new Panel(new GridLayout(1, 3, 6, 0));
         btnPanel.add(btnApply);
         btnPanel.add(btnOk);
         btnPanel.add(btnCancel);
@@ -147,22 +136,19 @@ public class EditDialog extends Dialog {
 
     private void applyChanges() {
         try {
-            int x   = Integer.parseInt(tfX.getText().trim());
-            int y   = Integer.parseInt(tfY.getText().trim());
-            int tx  = Integer.parseInt(tfTx.getText().trim());
-            int ty  = Integer.parseInt(tfTy.getText().trim());
+            int x      = Integer.parseInt(tfX.getText().trim());
+            int y      = Integer.parseInt(tfY.getText().trim());
+            int tx     = Integer.parseInt(tfTx.getText().trim());
+            int ty     = Integer.parseInt(tfTy.getText().trim());
             double rot = Double.parseDouble(tfRot.getText().trim());
             int color  = (int) Long.parseLong(tfColor.getText().trim(), 16);
 
-            // Position absolue + translation
             form.set(x + tx, y + ty);
             form.setColor(color);
             form.setRotation(rot);
 
-            // Remet translation à 0 après application
             tfTx.setText("0");
             tfTy.setText("0");
-            // Met à jour X et Y affichés
             tfX.setText(String.valueOf(form.x()));
             tfY.setText(String.valueOf(form.y()));
 

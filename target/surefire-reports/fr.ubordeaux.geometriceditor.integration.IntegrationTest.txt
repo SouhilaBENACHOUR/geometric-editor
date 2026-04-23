@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: fr.ubordeaux.geometriceditor.integration.IntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.289 s -- in fr.ubordeaux.geometriceditor.integration.IntegrationTest

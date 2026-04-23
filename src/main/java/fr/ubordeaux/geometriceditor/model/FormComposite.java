@@ -12,14 +12,12 @@ public class FormComposite extends Form implements Iterable<Form> {
     private Set<Form>       formsSet = new HashSet<>();
 
     public void draw() {
-    for (Form f : forms) {
-        if (f instanceof FormAbstract) {
-            ((FormAbstract) f).draw();
-        } else if (f instanceof FormComposite) {
-            ((FormComposite) f).draw();
+        for (Form f : forms) {
+            if (f instanceof FormAbstract) ((FormAbstract) f).draw();
+            else if (f instanceof FormComposite) ((FormComposite) f).draw();
         }
     }
-}
+
     public void add(Form f) {
         if (formsSet.contains(f)) return;
         forms.add(f);
@@ -78,6 +76,17 @@ public class FormComposite extends Form implements Iterable<Form> {
     @Override
     public int getColor() {
         return forms.isEmpty() ? 0 : forms.get(0).getColor();
+    }
+
+    @Override
+    public double getRotation() {
+        return forms.isEmpty() ? 0 : forms.get(0).getRotation();
+    }
+
+    @Override
+    public void setRotation(double deg) {
+        for (Form f : forms) f.setRotation(deg);
+        notifyObservers();
     }
 
     @Override

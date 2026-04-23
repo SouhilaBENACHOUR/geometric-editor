@@ -1,11 +1,12 @@
 package fr.ubordeaux.geometriceditor.editor;
 
 import fr.ubordeaux.geometriceditor.model.Form;
+import fr.ubordeaux.geometriceditor.model.FormAbstract;
+import fr.ubordeaux.geometriceditor.model.FormComposite;
 import fr.ubordeaux.geometriceditor.model.Rectangle;
 import fr.ubordeaux.geometriceditor.model.RegularPolygon;
 
 import java.awt.Button;
-import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -13,92 +14,192 @@ import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.Panel;
 import java.awt.TextField;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class EditDialog extends Dialog {
 
-    private boolean confirmed = false;
+    // Snapshot avant ouverture
+    private final int    snapX, snapY, snapColor;
+    private final double snapRot;
+    private final int    snapW, snapH, snapArc;
+    private final int    snapSides, snapLen;
+
+    private final Form form;
+    private Runnable   onApply;
+
+    // Champs communs
+    private final TextField tfX, tfY, tfColor, tfRot, tfTx, tfTy;
+
+    // Champs Rectangle
+    private final TextField tfW, tfH, tfArc;
+
+    // Champs Polygon
+    private final TextField tfSides, tfLen;
 
     public EditDialog(Frame parent, Form form) {
-        super(parent, "Editer la forme", true);
-        setLayout(new GridLayout(0, 2, 8, 8));
-        setSize(320, 280);
+        super(parent, "Éditer la forme", true);
+        this.form = form;
+
+        // Snapshot
+        snapX     = form.x();
+        snapY     = form.y();
+        snapColor = form.getColor();
+        snapRot   = form.getRotation();
+
+        if (form instanceof Rectangle) {
+            Rectangle r = (Rectangle) form;
+            snapW = r.getWidth(); snapH = r.getHeight(); snapArc = r.getArcRadius();
+            snapSides = 0; snapLen = 0;
+        } else if (form instanceof RegularPolygon) {
+            RegularPolygon p = (RegularPolygon) form;
+            snapSides = p.getSides(); snapLen = p.getSideLength();
+            snapW = 0; snapH = 0; snapArc = 0;
+        } else {
+            snapW = snapH = snapArc = snapSides = snapLen = 0;
+        }
+
+        // Calcul du nombre de lignes
+        int rows = 7; // X, Y, Rotation, Translation X, Translation Y, Couleur, boutons
+        if (form instanceof Rectangle)      rows += 3;
+        if (form instanceof RegularPolygon) rows += 2;
+
+        setLayout(new GridLayout(rows, 2, 8, 6));
+        setSize(360, rows * 38 + 20);
         setLocationRelativeTo(parent);
 
         // Champs communs
-        TextField tfX = addField("X :", String.valueOf(form.x()));
-        TextField tfY = addField("Y :", String.valueOf(form.y()));
+        tfX     = addField("Position X :",     String.valueOf(form.x()));
+        tfY     = addField("Position Y :",     String.valueOf(form.y()));
+        tfRot   = addField("Rotation (°) :",   String.valueOf((int) snapRot));
+        tfTx    = addField("Translation X :",  "0");
+        tfTy    = addField("Translation Y :",  "0");
+        tfColor = addField("Couleur (hex) :",
+            String.format("%06X", form.getColor() & 0xFFFFFF));
 
-        // Champs spécifiques
-        TextField tfW = null, tfH = null, tfArc = null;
-        TextField tfSides = null, tfLen = null;
-
+        // Champs Rectangle
         if (form instanceof Rectangle) {
             Rectangle r = (Rectangle) form;
             tfW   = addField("Largeur :",  String.valueOf(r.getWidth()));
             tfH   = addField("Hauteur :",  String.valueOf(r.getHeight()));
             tfArc = addField("Arrondi :",  String.valueOf(r.getArcRadius()));
-        } else if (form instanceof RegularPolygon) {
-            RegularPolygon p = (RegularPolygon) form;
-            tfSides = addField("Côtés :",        String.valueOf(p.getSides()));
-            tfLen   = addField("Longueur côté :", String.valueOf(p.getSideLength()));
+        } else {
+            tfW = tfH = tfArc = null;
         }
 
-        // Couleur (valeur hex)
-        TextField tfColor = addField("Couleur (hex) :",
-            String.format("%06X", form.getColor() & 0xFFFFFF));
+        // Champs Polygon
+        if (form instanceof RegularPolygon) {
+            RegularPolygon p = (RegularPolygon) form;
+            tfSides = addField("Côtés :",         String.valueOf(p.getSides()));
+            tfLen   = addField("Longueur côté :", String.valueOf(p.getSideLength()));
+        } else {
+            tfSides = tfLen = null;
+        }
 
         // Boutons
-        final TextField finalTfW = tfW, finalTfH = tfH, finalTfArc = tfArc;
-        final TextField finalTfSides = tfSides, finalTfLen = tfLen;
+        Button btnApply  = new Button("Appliquer");
+        Button btnOk     = new Button("OK");
+        Button btnCancel = new Button("Annuler");
 
-        Button ok = new Button("OK");
-        Button cancel = new Button("Annuler");
+        btnApply.addActionListener(e -> {
+            applyChanges();
+            if (onApply != null) onApply.run();
+        });
 
-        ok.addActionListener(e -> {
-            try {
-                form.set(Integer.parseInt(tfX.getText()),
-                         Integer.parseInt(tfY.getText()));
-
-                if (form instanceof Rectangle) {
-                    Rectangle r = (Rectangle) form;
-                    r.setWidth    (Integer.parseInt(finalTfW.getText()));
-                    r.setHeight   (Integer.parseInt(finalTfH.getText()));
-                    r.setArcRadius(Integer.parseInt(finalTfArc.getText()));
-                } else if (form instanceof RegularPolygon) {
-                    RegularPolygon p = (RegularPolygon) form;
-                    p.setSides     (Integer.parseInt(finalTfSides.getText()));
-                    p.setSideLength(Integer.parseInt(finalTfLen.getText()));
-                }
-
-                int color = (int) Long.parseLong(tfColor.getText(), 16);
-                form.setColor(color);
-
-                confirmed = true;
-            } catch (NumberFormatException ex) {
-                // Valeur invalide — on ignore
-            }
+        btnOk.addActionListener(e -> {
+            applyChanges();
+            if (onApply != null) onApply.run();
             dispose();
         });
 
-        cancel.addActionListener(e -> dispose());
+        btnCancel.addActionListener(e -> {
+            restoreSnapshot();
+            if (onApply != null) onApply.run();
+            dispose();
+        });
 
-        Panel btnPanel = new Panel(new FlowLayout());
-        btnPanel.add(ok);
-        btnPanel.add(cancel);
-        add(new Label()); // spacer
+        Panel btnPanel = new Panel(new FlowLayout(FlowLayout.CENTER, 8, 4));
+        btnPanel.add(btnApply);
+        btnPanel.add(btnOk);
+        btnPanel.add(btnCancel);
+
+        add(new Label());
         add(btnPanel);
 
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override public void windowClosing(java.awt.event.WindowEvent e) { dispose(); }
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                restoreSnapshot();
+                if (onApply != null) onApply.run();
+                dispose();
+            }
         });
     }
 
-    private TextField addField(String labelText, String value) {
-        add(new Label(labelText));
-        TextField tf = new TextField(value, 10);
+    public void setOnApply(Runnable r) { this.onApply = r; }
+
+    private TextField addField(String label, String value) {
+        add(new Label(label));
+        TextField tf = new TextField(value, 12);
         add(tf);
         return tf;
     }
 
-    public boolean isConfirmed() { return confirmed; }
+    private void applyChanges() {
+        try {
+            int x   = Integer.parseInt(tfX.getText().trim());
+            int y   = Integer.parseInt(tfY.getText().trim());
+            int tx  = Integer.parseInt(tfTx.getText().trim());
+            int ty  = Integer.parseInt(tfTy.getText().trim());
+            double rot = Double.parseDouble(tfRot.getText().trim());
+            int color  = (int) Long.parseLong(tfColor.getText().trim(), 16);
+
+            // Position absolue + translation
+            form.set(x + tx, y + ty);
+            form.setColor(color);
+            form.setRotation(rot);
+
+            // Remet translation à 0 après application
+            tfTx.setText("0");
+            tfTy.setText("0");
+            // Met à jour X et Y affichés
+            tfX.setText(String.valueOf(form.x()));
+            tfY.setText(String.valueOf(form.y()));
+
+            if (form instanceof Rectangle && tfW != null) {
+                Rectangle r = (Rectangle) form;
+                r.setWidth    (Integer.parseInt(tfW.getText().trim()));
+                r.setHeight   (Integer.parseInt(tfH.getText().trim()));
+                r.setArcRadius(Integer.parseInt(tfArc.getText().trim()));
+            }
+
+            if (form instanceof RegularPolygon && tfSides != null) {
+                RegularPolygon p = (RegularPolygon) form;
+                p.setSides     (Integer.parseInt(tfSides.getText().trim()));
+                p.setSideLength(Integer.parseInt(tfLen.getText().trim()));
+            }
+
+        } catch (NumberFormatException ex) {
+            // Valeur invalide ignorée
+        }
+    }
+
+    private void restoreSnapshot() {
+        form.set(snapX, snapY);
+        form.setColor(snapColor);
+        form.setRotation(snapRot);
+
+        if (form instanceof Rectangle) {
+            Rectangle r = (Rectangle) form;
+            r.setWidth(snapW);
+            r.setHeight(snapH);
+            r.setArcRadius(snapArc);
+        }
+
+        if (form instanceof RegularPolygon) {
+            RegularPolygon p = (RegularPolygon) form;
+            p.setSides(snapSides);
+            p.setSideLength(snapLen);
+        }
+    }
 }

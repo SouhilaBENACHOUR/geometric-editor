@@ -4,15 +4,15 @@ import fr.ubordeaux.geometriceditor.view.FormImplementation;
 
 public abstract class FormAbstract extends Form {
 
-    private int color;
-    private int x, y;
+    private int    color;
+    private int    x, y;
+    private double rotation = 0;
 
     public FormAbstract(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    // --- Pattern Bridge : délègue le rendu ---
     public void draw() {
         FormImplementation.getInstance().draw_impl(this);
     }
@@ -30,6 +30,17 @@ public abstract class FormAbstract extends Form {
         this.color = color;
         this.notifyObservers();
         return this;
+    }
+
+    @Override
+    public double getRotation() {
+        return rotation;
+    }
+
+    @Override
+    public void setRotation(double deg) {
+        this.rotation = deg;
+        this.notifyObservers();
     }
 
     @Override public int x()        { return x; }

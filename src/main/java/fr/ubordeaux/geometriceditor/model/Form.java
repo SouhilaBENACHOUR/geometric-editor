@@ -5,7 +5,6 @@ import java.util.HashSet;
 
 public abstract class Form implements Cloneable {
 
-    // --- Méthodes abstraites ---
     public abstract void accept(FormVisitor visitor);
     public abstract Form setColor(int color);
     public abstract Form set(int x, int y);
@@ -13,8 +12,9 @@ public abstract class Form implements Cloneable {
     public abstract int y();
     public abstract int getColor();
     public abstract FormEditor createEditor();
+    public abstract double getRotation();
+    public abstract void setRotation(double deg);
 
-    // --- Pattern Prototype ---
     public Form clone() {
         try {
             return (Form) super.clone();
@@ -23,10 +23,9 @@ public abstract class Form implements Cloneable {
         }
     }
 
-    // --- Pattern Observer (intégré comme le prof) ---
-    private ArrayList<FormObserver> observers = new ArrayList<>();
-    private HashSet<FormObserver> observersSet = new HashSet<>();
-    private boolean isNotifying = false;
+    private ArrayList<FormObserver> observers    = new ArrayList<>();
+    private HashSet<FormObserver>   observersSet = new HashSet<>();
+    private boolean                 isNotifying  = false;
 
     public void addObserver(FormObserver observer) {
         if (observersSet.contains(observer)) return;

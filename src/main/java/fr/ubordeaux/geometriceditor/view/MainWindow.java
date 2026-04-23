@@ -115,14 +115,15 @@ public class MainWindow extends Frame {
         whiteboard.add(contextMenu);
 
         contextMenu.setOnEdit(() -> {
-            Form sel = whiteboard.getSelectedForm();
-            if (sel != null) {
-                EditDialog dialog = new EditDialog(this, sel);
-                dialog.setVisible(true);
-                whiteboard.repaint();
-                statusBar.setText("Forme éditée");
-            }
-        });
+         Form sel = whiteboard.getSelectedForm();
+         if (sel != null) {
+          EditDialog dialog = new EditDialog(MainWindow.this, sel);
+          dialog.setOnApply(() -> whiteboard.repaint());
+          dialog.setVisible(true);
+          whiteboard.repaint();
+          statusBar.setText("Forme éditée");
+    }
+});
 
         contextMenu.setOnGroup(() -> {
             java.util.List<Form> sel = new ArrayList<>(whiteboard.getSelection());
